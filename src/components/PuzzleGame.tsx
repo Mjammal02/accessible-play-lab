@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { PuzzlePiece } from "./PuzzlePiece";
-import { FeedbackSystem } from "./FeedbackSystem";
 import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Upload } from "lucide-react";
+import defaultImage1 from "@/assets/puzzle-default-1.jpg";
+import defaultImage2 from "@/assets/puzzle-default-2.jpg";
+import defaultImage3 from "@/assets/puzzle-default-3.jpg";
 
 export interface PuzzleConfig {
   gridType: "2x2" | "3x3" | "3x2";
-  feedbackType: "visual" | "audio" | "both";
 }
 
 interface GridDimensions {
@@ -27,11 +28,11 @@ interface PieceData {
 export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
   const [pieces, setPieces] = useState<PieceData[]>([]);
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
+  const [draggedPiece, setDraggedPiece] = useState<number | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [moves, setMoves] = useState(0);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [feedbackType, setFeedbackType] = useState<"success" | "error">("success");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [showImageSelect, setShowImageSelect] = useState(true);
 
   const getGridDimensions = (gridType: string): GridDimensions => {
     switch (gridType) {
@@ -56,9 +57,15 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
       const reader = new FileReader();
       reader.onload = (event) => {
         setUploadedImage(event.target?.result as string);
+        setShowImageSelect(false);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleDefaultImageSelect = (imageUrl: string) => {
+    setUploadedImage(imageUrl);
+    setShowImageSelect(false);
   };
 
   const initializePuzzle = () => {
@@ -93,27 +100,43 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
     } else if (selectedPiece === pieceId) {
       setSelectedPiece(null);
     } else {
-      // Swap pieces
-      const newPieces = [...pieces];
-      const piece1 = newPieces.find(p => p.id === selectedPiece)!;
-      const piece2 = newPieces.find(p => p.id === pieceId)!;
-      
-      [piece1.currentPosition, piece2.currentPosition] = 
-        [piece2.currentPosition, piece1.currentPosition];
-      
-      setPieces(newPieces);
-      setMoves(moves + 1);
-      setSelectedPiece(null);
-
-      // Check if puzzle is complete
-      const complete = newPieces.every(p => p.currentPosition === p.correctPosition);
-      if (complete) {
-        setIsComplete(true);
-        setFeedbackType("success");
-        setShowFeedback(true);
-        setTimeout(() => setShowFeedback(false), 3000);
-      }
+      swapPieces(selectedPiece, pieceId);
     }
+  };
+
+  const swapPieces = (piece1Id: number, piece2Id: number) => {
+    const newPieces = [...pieces];
+    const piece1 = newPieces.find(p => p.id === piece1Id)!;
+    const piece2 = newPieces.find(p => p.id === piece2Id)!;
+    
+    [piece1.currentPosition, piece2.currentPosition] = 
+      [piece2.currentPosition, piece1.currentPosition];
+    
+    setPieces(newPieces);
+    setMoves(moves + 1);
+    setSelectedPiece(null);
+
+    // Check if puzzle is complete
+    const complete = newPieces.every(p => p.currentPosition === p.correctPosition);
+    if (complete) {
+      setIsComplete(true);
+    }
+  };
+
+  const handleDragStart = (pieceId: number) => {
+    if (isComplete) return;
+    setDraggedPiece(pieceId);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (pieceId: number) => {
+    if (draggedPiece !== null && draggedPiece !== pieceId) {
+      swapPieces(draggedPiece, pieceId);
+    }
+    setDraggedPiece(null);
   };
 
   const gridCols = `grid-cols-${gridDims.cols}`;
@@ -122,21 +145,56 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
   return (
     <div className="flex flex-col items-center gap-6 p-4">
       <Card className="p-6 w-full max-w-2xl">
-        {!uploadedImage ? (
-          <div className="text-center space-y-4">
-            <h3 className="text-xl font-semibold text-foreground">Ladda upp en bild</h3>
-            <p className="text-muted-foreground">Välj en bild som ska bli ett pussel</p>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="block w-full text-sm text-foreground
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-primary file:text-primary-foreground
-                hover:file:bg-primary/90 cursor-pointer"
-            />
+        {showImageSelect ? (
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <h3 className="text-xl font-semibold text-foreground">Välj en bild för ditt pussel</h3>
+              <p className="text-muted-foreground">Välj en av bilderna nedan eller ladda upp din egen</p>
+            </div>
+            
+            {/* Default images */}
+            <div className="grid grid-cols-3 gap-4">
+              <button
+                onClick={() => handleDefaultImageSelect(defaultImage1)}
+                className="aspect-video rounded-lg overflow-hidden border-2 border-border hover:border-primary transition-colors"
+              >
+                <img src={defaultImage1} alt="Landskap med solnedgång" className="w-full h-full object-cover" />
+              </button>
+              <button
+                onClick={() => handleDefaultImageSelect(defaultImage2)}
+                className="aspect-video rounded-lg overflow-hidden border-2 border-border hover:border-primary transition-colors"
+              >
+                <img src={defaultImage2} alt="Färgglad trädgård" className="w-full h-full object-cover" />
+              </button>
+              <button
+                onClick={() => handleDefaultImageSelect(defaultImage3)}
+                className="aspect-video rounded-lg overflow-hidden border-2 border-border hover:border-primary transition-colors"
+              >
+                <img src={defaultImage3} alt="Söt katt" className="w-full h-full object-cover" />
+              </button>
+            </div>
+
+            {/* Upload custom image */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">eller</span>
+              </div>
+            </div>
+
+            <label className="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary transition-colors">
+              <Upload className="h-8 w-8 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">Ladda upp din egen bild</span>
+              <span className="text-xs text-muted-foreground">Klicka för att välja en bild</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </label>
           </div>
         ) : (
           <>
@@ -177,30 +235,28 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
                     key={piece.id}
                     piece={piece}
                     isSelected={selectedPiece === piece.id}
+                    isDragged={draggedPiece === piece.id}
                     isComplete={isComplete}
                     onClick={() => handlePieceClick(piece.id)}
+                    onDragStart={() => handleDragStart(piece.id)}
+                    onDragOver={handleDragOver}
+                    onDrop={() => handleDrop(piece.id)}
                     imageUrl={uploadedImage}
                     gridDims={gridDims}
                   />
                 ))}
             </div>
+
+            {isComplete && (
+              <div className="mt-6 text-center">
+                <p className="text-xl font-bold text-success animate-fade-in">
+                  🎉 Grattis! Du klarade pusslet på {moves} drag!
+                </p>
+              </div>
+            )}
           </>
         )}
-
-        {isComplete && (
-          <div className="mt-6 text-center">
-            <p className="text-xl font-bold text-success animate-fade-in">
-              🎉 Grattis! Du klarade pusslet på {moves} drag!
-            </p>
-          </div>
-        )}
       </Card>
-
-      <FeedbackSystem
-        show={showFeedback}
-        type={feedbackType}
-        feedbackMode={config.feedbackType}
-      />
     </div>
   );
 };

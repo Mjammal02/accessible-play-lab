@@ -5,7 +5,6 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 const Index = () => {
   const [config, setConfig] = useState<PuzzleConfig>({
     gridType: "2x2",
-    feedbackType: "both",
   });
 
   return (
@@ -33,9 +32,9 @@ const Index = () => {
             <div className="bg-info/10 border border-info/20 rounded-lg p-4">
               <h3 className="font-semibold text-info mb-2">Om projektet</h3>
               <p className="text-sm text-foreground/80">
-                Detta projekt undersöker hur antal pusselbitar och återkopplingssystem 
-                påverkar tillgängligheten och användbarheten för användare med kognitiva svårigheter. 
-                Ladda upp en egen bild för att skapa ett personligt pussel.
+                Detta projekt undersöker hur antal pusselbitar påverkar tillgängligheten och 
+                användbarheten för användare med kognitiva svårigheter. Välj en av de förvalda 
+                bilderna eller ladda upp din egen för att skapa ett personligt pussel.
               </p>
             </div>
           </div>

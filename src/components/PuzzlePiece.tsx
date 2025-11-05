@@ -17,17 +17,25 @@ interface GridDimensions {
 interface PuzzlePieceProps {
   piece: PieceData;
   isSelected: boolean;
+  isDragged: boolean;
   isComplete: boolean;
   onClick: () => void;
+  onDragStart: () => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: () => void;
   imageUrl: string;
   gridDims: GridDimensions;
 }
 
 export const PuzzlePiece = ({ 
   piece, 
-  isSelected, 
+  isSelected,
+  isDragged,
   isComplete, 
-  onClick, 
+  onClick,
+  onDragStart,
+  onDragOver,
+  onDrop,
   imageUrl,
   gridDims
 }: PuzzlePieceProps) => {
@@ -37,14 +45,19 @@ export const PuzzlePiece = ({
   return (
     <button
       onClick={onClick}
+      draggable={!isComplete}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
       disabled={isComplete}
       className={cn(
         "w-full h-full transition-all duration-300 relative overflow-hidden rounded-sm",
         "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring",
         "disabled:cursor-not-allowed",
         isSelected && "ring-4 ring-primary scale-95",
-        isComplete && "animate-scale-in",
-        !isComplete && "hover:scale-105 active:scale-95 cursor-pointer"
+        isDragged && "opacity-50 scale-95",
+        isComplete && "animate-scale-in cursor-default",
+        !isComplete && "hover:scale-105 active:scale-95 cursor-grab active:cursor-grabbing"
       )}
       style={{
         backgroundImage: `url(${imageUrl})`,
