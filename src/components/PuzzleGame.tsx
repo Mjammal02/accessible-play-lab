@@ -6,17 +6,22 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 
 export interface PuzzleConfig {
-  pieces: number;
-  contrastLevel: "AA" | "AAA";
-  pieceShape: "standard" | "geometric";
+  gridType: "2x2" | "3x3" | "3x2";
   feedbackType: "visual" | "audio" | "both";
+}
+
+interface GridDimensions {
+  cols: number;
+  rows: number;
+  total: number;
 }
 
 interface PieceData {
   id: number;
   currentPosition: number;
   correctPosition: number;
-  color: string;
+  row: number;
+  col: number;
 }
 
 export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
@@ -26,23 +31,45 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
   const [moves, setMoves] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackType, setFeedbackType] = useState<"success" | "error">("success");
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
-  const colors = config.contrastLevel === "AAA"
-    ? ["hsl(142, 76%, 36%)", "hsl(199, 89%, 48%)", "hsl(38, 92%, 50%)", "hsl(0, 84%, 60%)", 
-       "hsl(271, 76%, 53%)", "hsl(142, 70%, 45%)", "hsl(199, 89%, 58%)", "hsl(38, 90%, 55%)", "hsl(0, 62%, 30%)"]
-    : ["hsl(142, 70%, 45%)", "hsl(199, 89%, 58%)", "hsl(38, 90%, 55%)", "hsl(0, 62%, 30%)", 
-       "hsl(271, 70%, 60%)", "hsl(142, 65%, 50%)", "hsl(199, 85%, 65%)", "hsl(38, 85%, 60%)", "hsl(0, 60%, 40%)"];
+  const getGridDimensions = (gridType: string): GridDimensions => {
+    switch (gridType) {
+      case "2x2": return { cols: 2, rows: 2, total: 4 };
+      case "3x3": return { cols: 3, rows: 3, total: 9 };
+      case "3x2": return { cols: 3, rows: 2, total: 6 };
+      default: return { cols: 2, rows: 2, total: 4 };
+    }
+  };
+
+  const gridDims = getGridDimensions(config.gridType);
 
   useEffect(() => {
-    initializePuzzle();
-  }, [config.pieces]);
+    if (uploadedImage) {
+      initializePuzzle();
+    }
+  }, [config.gridType, uploadedImage]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setUploadedImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const initializePuzzle = () => {
-    const newPieces: PieceData[] = Array.from({ length: config.pieces }, (_, i) => ({
+    if (!uploadedImage) return;
+
+    const newPieces: PieceData[] = Array.from({ length: gridDims.total }, (_, i) => ({
       id: i,
       currentPosition: i,
       correctPosition: i,
-      color: colors[i % colors.length],
+      row: Math.floor(i / gridDims.cols),
+      col: i % gridDims.cols,
     }));
 
     // Shuffle pieces
@@ -89,43 +116,76 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
     }
   };
 
-  const gridCols = config.pieces === 4 ? "grid-cols-2" : config.pieces === 6 ? "grid-cols-3" : "grid-cols-3";
-  const gridRows = config.pieces === 4 ? "grid-rows-2" : config.pieces === 6 ? "grid-rows-2" : "grid-rows-3";
+  const gridCols = `grid-cols-${gridDims.cols}`;
+  const gridRows = `grid-rows-${gridDims.rows}`;
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
       <Card className="p-6 w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-lg font-semibold text-foreground">
-            Drag: {moves}
+        {!uploadedImage ? (
+          <div className="text-center space-y-4">
+            <h3 className="text-xl font-semibold text-foreground">Ladda upp en bild</h3>
+            <p className="text-muted-foreground">Välj en bild som ska bli ett pussel</p>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="block w-full text-sm text-foreground
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-md file:border-0
+                file:text-sm file:font-semibold
+                file:bg-primary file:text-primary-foreground
+                hover:file:bg-primary/90 cursor-pointer"
+            />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={initializePuzzle}
-            className="gap-2"
-            aria-label="Återställ pusselspel"
-          >
-            <RotateCcw className="h-4 w-4" />
-            Börja om
-          </Button>
-        </div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-lg font-semibold text-foreground">
+                Drag: {moves}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={initializePuzzle}
+                  className="gap-2"
+                  aria-label="Återställ pusselspel"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Börja om
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setUploadedImage(null);
+                    setPieces([]);
+                  }}
+                  aria-label="Ny bild"
+                >
+                  Ny bild
+                </Button>
+              </div>
+            </div>
 
-        <div className={`grid ${gridCols} ${gridRows} gap-3 aspect-square w-full max-w-md mx-auto`}>
-          {pieces
-            .sort((a, b) => a.currentPosition - b.currentPosition)
-            .map((piece) => (
-              <PuzzlePiece
-                key={piece.id}
-                piece={piece}
-                isSelected={selectedPiece === piece.id}
-                isCorrect={piece.currentPosition === piece.correctPosition}
-                isComplete={isComplete}
-                onClick={() => handlePieceClick(piece.id)}
-                shape={config.pieceShape}
-              />
-            ))}
-        </div>
+            <div className={`grid ${gridCols} ${gridRows} gap-2 w-full max-w-md mx-auto`} style={{ aspectRatio: `${gridDims.cols}/${gridDims.rows}` }}>
+              {pieces
+                .sort((a, b) => a.currentPosition - b.currentPosition)
+                .map((piece) => (
+                  <PuzzlePiece
+                    key={piece.id}
+                    piece={piece}
+                    isSelected={selectedPiece === piece.id}
+                    isComplete={isComplete}
+                    onClick={() => handlePieceClick(piece.id)}
+                    imageUrl={uploadedImage}
+                    gridDims={gridDims}
+                  />
+                ))}
+            </div>
+          </>
+        )}
 
         {isComplete && (
           <div className="mt-6 text-center">

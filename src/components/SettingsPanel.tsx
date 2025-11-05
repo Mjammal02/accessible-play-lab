@@ -15,67 +15,23 @@ export const SettingsPanel = ({ config, onConfigChange }: SettingsPanelProps) =>
       <h2 className="text-2xl font-bold text-foreground mb-4">Inställningar</h2>
       
       <div className="space-y-6">
-        {/* Antal pusselbitar */}
+        {/* Grid-storlek */}
         <div className="space-y-3">
-          <Label className="text-lg font-semibold">Antal pusselbitar</Label>
+          <Label className="text-lg font-semibold">Pussel-storlek</Label>
           <Tabs
-            value={config.pieces.toString()}
+            value={config.gridType}
             onValueChange={(value) =>
-              onConfigChange({ ...config, pieces: parseInt(value) })
+              onConfigChange({ ...config, gridType: value as "2x2" | "3x3" | "3x2" })
             }
           >
             <TabsList className="grid grid-cols-3 w-full">
-              <TabsTrigger value="4">4 bitar</TabsTrigger>
-              <TabsTrigger value="6">6 bitar</TabsTrigger>
-              <TabsTrigger value="9">9 bitar</TabsTrigger>
+              <TabsTrigger value="2x2">2×2</TabsTrigger>
+              <TabsTrigger value="3x2">3×2</TabsTrigger>
+              <TabsTrigger value="3x3">3×3</TabsTrigger>
             </TabsList>
           </Tabs>
           <p className="text-sm text-muted-foreground">
             Färre bitar = enklare pussel för kognitiv tillgänglighet
-          </p>
-        </div>
-
-        {/* Färgkontrast */}
-        <div className="space-y-3">
-          <Label className="text-lg font-semibold">Färgkontrast</Label>
-          <Tabs
-            value={config.contrastLevel}
-            onValueChange={(value) =>
-              onConfigChange({ ...config, contrastLevel: value as "AA" | "AAA" })
-            }
-          >
-            <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="AA">
-                WCAG AA
-                <Badge variant="outline" className="ml-2">Normal</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="AAA">
-                WCAG AAA
-                <Badge variant="outline" className="ml-2">Hög</Badge>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <p className="text-sm text-muted-foreground">
-            AAA ger högre kontrast för bättre synlighet
-          </p>
-        </div>
-
-        {/* Form på pusselbitar */}
-        <div className="space-y-3">
-          <Label className="text-lg font-semibold">Form på pusselbitar</Label>
-          <Tabs
-            value={config.pieceShape}
-            onValueChange={(value) =>
-              onConfigChange({ ...config, pieceShape: value as "standard" | "geometric" })
-            }
-          >
-            <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="standard">Standard</TabsTrigger>
-              <TabsTrigger value="geometric">Geometrisk</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <p className="text-sm text-muted-foreground">
-            Geometriska former kan vara tydligare att skilja åt
           </p>
         </div>
 
