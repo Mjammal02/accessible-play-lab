@@ -39,8 +39,9 @@ export const PuzzlePiece = ({
   imageUrl,
   gridDims
 }: PuzzlePieceProps) => {
-  const percentageX = (piece.col / gridDims.cols) * 100;
-  const percentageY = (piece.row / gridDims.rows) * 100;
+  // Calculate background position to show the correct part of the image
+  const percentageX = gridDims.cols > 1 ? (piece.col / (gridDims.cols - 1)) * 100 : 0;
+  const percentageY = gridDims.rows > 1 ? (piece.row / (gridDims.rows - 1)) * 100 : 0;
 
   return (
     <button
