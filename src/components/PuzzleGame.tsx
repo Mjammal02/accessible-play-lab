@@ -8,7 +8,7 @@ import defaultImage2 from "@/assets/puzzle-default-2.jpg";
 import defaultImage3 from "@/assets/puzzle-default-3.jpg";
 
 export interface PuzzleConfig {
-  gridType: "1x2" | "2x2" | "2x3" | "3x2" | "2x4" | "3x3";
+  gridType: "2x2" | "3x2" | "4x2" | "3x3";
 }
 
 interface GridDimensions {
@@ -36,11 +36,9 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
 
   const getGridDimensions = (gridType: string): GridDimensions => {
     switch (gridType) {
-      case "1x2": return { cols: 1, rows: 2, total: 2 };
       case "2x2": return { cols: 2, rows: 2, total: 4 };
-      case "2x3": return { cols: 2, rows: 3, total: 6 };
       case "3x2": return { cols: 3, rows: 2, total: 6 };
-      case "2x4": return { cols: 2, rows: 4, total: 8 };
+      case "4x2": return { cols: 4, rows: 2, total: 8 };
       case "3x3": return { cols: 3, rows: 3, total: 9 };
       default: return { cols: 2, rows: 2, total: 4 };
     }
