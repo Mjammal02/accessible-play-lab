@@ -16,17 +16,22 @@ export const SettingsPanel = ({ config, onConfigChange }: SettingsPanelProps) =>
       <div className="space-y-6">
         {/* Grid-storlek */}
         <div className="space-y-3">
-          <Label className="text-lg font-semibold">Pussel-storlek</Label>
+          <Label className="text-lg font-semibold">Antal bitar</Label>
           <Tabs
             value={config.gridType}
             onValueChange={(value) =>
-              onConfigChange({ ...config, gridType: value as "2x2" | "3x3" | "3x2" })
+              onConfigChange({ ...config, gridType: value as "1x2" | "2x2" | "2x3" | "3x2" | "2x4" | "3x3" })
             }
           >
-            <TabsList className="grid grid-cols-3 w-full">
-              <TabsTrigger value="2x2">2×2</TabsTrigger>
-              <TabsTrigger value="3x2">3×2</TabsTrigger>
-              <TabsTrigger value="3x3">3×3</TabsTrigger>
+            <TabsList className="grid grid-cols-3 w-full gap-2">
+              <TabsTrigger value="1x2">2 bitar</TabsTrigger>
+              <TabsTrigger value="2x2">4 bitar</TabsTrigger>
+              <TabsTrigger value="2x3">6 bitar</TabsTrigger>
+            </TabsList>
+            <TabsList className="grid grid-cols-3 w-full gap-2 mt-2">
+              <TabsTrigger value="3x2">6 bitar (bred)</TabsTrigger>
+              <TabsTrigger value="2x4">8 bitar</TabsTrigger>
+              <TabsTrigger value="3x3">9 bitar</TabsTrigger>
             </TabsList>
           </Tabs>
           <p className="text-sm text-muted-foreground">

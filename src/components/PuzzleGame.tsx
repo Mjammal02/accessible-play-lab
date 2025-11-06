@@ -8,7 +8,7 @@ import defaultImage2 from "@/assets/puzzle-default-2.jpg";
 import defaultImage3 from "@/assets/puzzle-default-3.jpg";
 
 export interface PuzzleConfig {
-  gridType: "2x2" | "3x3" | "3x2";
+  gridType: "1x2" | "2x2" | "2x3" | "3x2" | "2x4" | "3x3";
 }
 
 interface GridDimensions {
@@ -36,9 +36,12 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
 
   const getGridDimensions = (gridType: string): GridDimensions => {
     switch (gridType) {
+      case "1x2": return { cols: 1, rows: 2, total: 2 };
       case "2x2": return { cols: 2, rows: 2, total: 4 };
-      case "3x3": return { cols: 3, rows: 3, total: 9 };
+      case "2x3": return { cols: 2, rows: 3, total: 6 };
       case "3x2": return { cols: 3, rows: 2, total: 6 };
+      case "2x4": return { cols: 2, rows: 4, total: 8 };
+      case "3x3": return { cols: 3, rows: 3, total: 9 };
       default: return { cols: 2, rows: 2, total: 4 };
     }
   };
@@ -139,8 +142,23 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
     setDraggedPiece(null);
   };
 
-  const gridCols = `grid-cols-${gridDims.cols}`;
-  const gridRows = `grid-rows-${gridDims.rows}`;
+  const getGridClass = () => {
+    const colClass = {
+      1: "grid-cols-1",
+      2: "grid-cols-2",
+      3: "grid-cols-3",
+      4: "grid-cols-4"
+    }[gridDims.cols] || "grid-cols-2";
+    
+    const rowClass = {
+      1: "grid-rows-1",
+      2: "grid-rows-2",
+      3: "grid-rows-3",
+      4: "grid-rows-4"
+    }[gridDims.rows] || "grid-rows-2";
+    
+    return `${colClass} ${rowClass}`;
+  };
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
@@ -219,6 +237,7 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
                   onClick={() => {
                     setUploadedImage(null);
                     setPieces([]);
+                    setShowImageSelect(true);
                   }}
                   aria-label="Ny bild"
                 >
@@ -227,7 +246,7 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
               </div>
             </div>
 
-            <div className={`grid ${gridCols} ${gridRows} gap-2 w-full max-w-md mx-auto`} style={{ aspectRatio: `${gridDims.cols}/${gridDims.rows}` }}>
+            <div className={`grid ${getGridClass()} gap-2 w-full max-w-md mx-auto`} style={{ aspectRatio: `${gridDims.cols}/${gridDims.rows}` }}>
               {pieces
                 .sort((a, b) => a.currentPosition - b.currentPosition)
                 .map((piece) => (
