@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { PuzzlePiece } from "./PuzzlePiece";
 import { Button } from "@/components/ui/button";
 import { RotateCcw, Upload } from "lucide-react";
+import { cn } from "@/lib/utils";
 import defaultImage1 from "@/assets/puzzle-default-1.jpg";
 import defaultImage2 from "@/assets/puzzle-default-2.jpg";
 import defaultImage3 from "@/assets/puzzle-default-3.jpg";
@@ -33,6 +34,7 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
   const [moves, setMoves] = useState(0);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [showImageSelect, setShowImageSelect] = useState(true);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   const getGridDimensions = (gridType: string): GridDimensions => {
     switch (gridType) {
@@ -67,6 +69,31 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
   const handleDefaultImageSelect = (imageUrl: string) => {
     setUploadedImage(imageUrl);
     setShowImageSelect(false);
+  };
+
+  const handleImageDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setUploadedImage(event.target?.result as string);
+        setShowImageSelect(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(true);
+  };
+
+  const handleImageDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
   };
 
   const initializePuzzle = () => {
@@ -200,10 +227,27 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
               </div>
             </div>
 
-            <label className="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary transition-colors">
-              <Upload className="h-8 w-8 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">Ladda upp din egen bild</span>
-              <span className="text-xs text-muted-foreground">Klicka för att välja en bild</span>
+            <label 
+              className={cn(
+                "flex flex-col items-center gap-2 p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
+                isDraggingOver 
+                  ? "border-primary bg-primary/10 scale-105" 
+                  : "border-border hover:border-primary"
+              )}
+              onDrop={handleImageDrop}
+              onDragOver={handleImageDragOver}
+              onDragLeave={handleImageDragLeave}
+            >
+              <Upload className={cn(
+                "h-8 w-8 transition-colors",
+                isDraggingOver ? "text-primary" : "text-muted-foreground"
+              )} />
+              <span className="text-sm font-medium text-foreground">
+                {isDraggingOver ? "Släpp bilden här" : "Ladda upp din egen bild"}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {isDraggingOver ? "Släpp för att ladda upp" : "Klicka för att välja eller dra och släpp"}
+              </span>
               <input
                 type="file"
                 accept="image/*"
