@@ -10,6 +10,7 @@ import defaultImage3 from "@/assets/puzzle-default-3.jpg";
 
 export interface PuzzleConfig {
   gridType: "2x2" | "3x2" | "4x2" | "3x3";
+  visualFeedback: "none" | "border" | "checkmark";
 }
 
 interface GridDimensions {
@@ -304,6 +305,7 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
                     onDrop={() => handleDrop(piece.id)}
                     imageUrl={uploadedImage}
                     gridDims={gridDims}
+                    visualFeedback={config.visualFeedback}
                   />
                 ))}
             </div>

@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PuzzleConfig } from "./PuzzleGame";
 
 interface SettingsPanelProps {
@@ -32,6 +33,39 @@ export const SettingsPanel = ({ config, onConfigChange }: SettingsPanelProps) =>
           </Tabs>
           <p className="text-sm text-muted-foreground">
             Färre bitar = enklare pussel för kognitiv tillgänglighet
+          </p>
+        </div>
+
+        {/* Visuell återkoppling */}
+        <div className="space-y-3">
+          <Label className="text-lg font-semibold">Visuell återkoppling</Label>
+          <RadioGroup
+            value={config.visualFeedback}
+            onValueChange={(value) =>
+              onConfigChange({ ...config, visualFeedback: value as "none" | "border" | "checkmark" })
+            }
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="none" id="none" />
+              <Label htmlFor="none" className="cursor-pointer font-normal">
+                Ingen återkoppling
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="border" id="border" />
+              <Label htmlFor="border" className="cursor-pointer font-normal">
+                Grön ram vid korrekt placering
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="checkmark" id="checkmark" />
+              <Label htmlFor="checkmark" className="cursor-pointer font-normal">
+                Grön checkmark vid korrekt placering
+              </Label>
+            </div>
+          </RadioGroup>
+          <p className="text-sm text-muted-foreground">
+            Visa när en pusselbit är korrekt placerad
           </p>
         </div>
       </div>

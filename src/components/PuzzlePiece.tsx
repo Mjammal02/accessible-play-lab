@@ -25,6 +25,7 @@ interface PuzzlePieceProps {
   onDrop: () => void;
   imageUrl: string;
   gridDims: GridDimensions;
+  visualFeedback: "none" | "border" | "checkmark";
 }
 
 export const PuzzlePiece = ({ 
@@ -37,11 +38,19 @@ export const PuzzlePiece = ({
   onDragOver,
   onDrop,
   imageUrl,
-  gridDims
+  gridDims,
+  visualFeedback
 }: PuzzlePieceProps) => {
-  // Calculate background position to show the correct part of the image
+  // Calculate current position's row and col for correct background display
+  const currentRow = Math.floor(piece.currentPosition / gridDims.cols);
+  const currentCol = piece.currentPosition % gridDims.cols;
+  
+  // Calculate background position based on the piece's original position (row/col)
   const percentageX = gridDims.cols > 1 ? (piece.col / (gridDims.cols - 1)) * 100 : 0;
   const percentageY = gridDims.rows > 1 ? (piece.row / (gridDims.rows - 1)) * 100 : 0;
+  
+  // Check if piece is correctly placed
+  const isCorrectlyPlaced = piece.currentPosition === piece.correctPosition;
 
   return (
     <button
@@ -58,7 +67,8 @@ export const PuzzlePiece = ({
         isSelected && "ring-4 ring-primary scale-95",
         isDragged && "opacity-50 scale-95",
         isComplete && "animate-scale-in cursor-default",
-        !isComplete && "hover:scale-105 active:scale-95 cursor-grab active:cursor-grabbing"
+        !isComplete && "hover:scale-105 active:scale-95 cursor-grab active:cursor-grabbing",
+        isCorrectlyPlaced && visualFeedback === "border" && "ring-4 ring-green-500"
       )}
       style={{
         backgroundImage: `url(${imageUrl})`,
@@ -68,6 +78,12 @@ export const PuzzlePiece = ({
       }}
       aria-label={`Pusselbit ${piece.id + 1}`}
       aria-pressed={isSelected}
-    />
+    >
+      {isCorrectlyPlaced && visualFeedback === "checkmark" && (
+        <span className="absolute top-1 right-1 text-green-500 text-xl font-bold bg-white/80 rounded-full w-6 h-6 flex items-center justify-center">
+          ✓
+        </span>
+      )}
+    </button>
   );
 };

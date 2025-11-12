@@ -5,6 +5,7 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 const Index = () => {
   const [config, setConfig] = useState<PuzzleConfig>({
     gridType: "2x2",
+    visualFeedback: "none",
   });
 
   return (
