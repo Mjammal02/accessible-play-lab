@@ -168,6 +168,10 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
     setDraggedPiece(null);
   };
 
+  const handleDragEnd = () => {
+    setDraggedPiece(null);
+  };
+
   const getGridClass = () => {
     const colClass = {
       1: "grid-cols-1",
@@ -303,6 +307,7 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
                     onDragStart={() => handleDragStart(piece.id)}
                     onDragOver={handleDragOver}
                     onDrop={() => handleDrop(piece.id)}
+                    onDragEnd={handleDragEnd}
                     imageUrl={uploadedImage}
                     gridDims={gridDims}
                     visualFeedback={config.visualFeedback}

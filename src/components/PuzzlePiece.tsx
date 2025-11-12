@@ -23,6 +23,7 @@ interface PuzzlePieceProps {
   onDragStart: () => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: () => void;
+  onDragEnd: () => void;
   imageUrl: string;
   gridDims: GridDimensions;
   visualFeedback: "none" | "border" | "checkmark";
@@ -37,6 +38,7 @@ export const PuzzlePiece = ({
   onDragStart,
   onDragOver,
   onDrop,
+  onDragEnd,
   imageUrl,
   gridDims,
   visualFeedback
@@ -59,6 +61,7 @@ export const PuzzlePiece = ({
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDrop={onDrop}
+      onDragEnd={onDragEnd}
       disabled={isComplete}
       className={cn(
         "w-full h-full transition-all duration-300 relative overflow-hidden rounded-sm",
@@ -80,9 +83,12 @@ export const PuzzlePiece = ({
       aria-pressed={isSelected}
     >
       {isCorrectlyPlaced && visualFeedback === "checkmark" && (
-        <span className="absolute top-1 right-1 text-green-500 text-xl font-bold bg-white/80 rounded-full w-6 h-6 flex items-center justify-center">
-          ✓
-        </span>
+        <div 
+          className="absolute top-2 right-2 flex items-center justify-center w-8 h-8 rounded-full shadow-lg"
+          style={{ backgroundColor: '#4CAF50' }}
+        >
+          <span className="text-white text-lg font-bold leading-none">✓</span>
+        </div>
       )}
     </button>
   );
