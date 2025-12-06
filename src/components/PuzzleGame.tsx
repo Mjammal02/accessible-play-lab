@@ -11,7 +11,28 @@ import defaultImage3 from "@/assets/puzzle-default-3.jpg";
 export interface PuzzleConfig {
   gridType: "2x2" | "3x2" | "4x2" | "3x3";
   visualFeedback: "none" | "border" | "checkmark";
+  soundEnabled: boolean;
 }
+
+const playSuccessSound = () => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  // Happy ascending notes
+  oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+  oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+  oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.4);
+};
 
 interface GridDimensions {
   cols: number;
@@ -138,12 +159,24 @@ export const PuzzleGame = ({ config }: { config: PuzzleConfig }) => {
     const piece1 = newPieces.find(p => p.id === piece1Id)!;
     const piece2 = newPieces.find(p => p.id === piece2Id)!;
     
+    const piece1OldPos = piece1.currentPosition;
+    const piece2OldPos = piece2.currentPosition;
+    
     [piece1.currentPosition, piece2.currentPosition] = 
       [piece2.currentPosition, piece1.currentPosition];
     
     setPieces(newPieces);
     setMoves(moves + 1);
     setSelectedPiece(null);
+
+    // Play sound if a piece was placed correctly
+    if (config.soundEnabled) {
+      const piece1NowCorrect = piece1.currentPosition === piece1.correctPosition;
+      const piece2NowCorrect = piece2.currentPosition === piece2.correctPosition;
+      if (piece1NowCorrect || piece2NowCorrect) {
+        playSuccessSound();
+      }
+    }
 
     // Check if puzzle is complete
     const complete = newPieces.every(p => p.currentPosition === p.correctPosition);
